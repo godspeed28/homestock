@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Item;
 use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
 
 class SearchController extends Controller
 {
@@ -12,8 +13,8 @@ class SearchController extends Controller
     {
         $query = $request->input('query');
 
-        $items = Item::with('category')->where('name', 'like', "%{$query}%")->limit(5)->get();
-        $categories = Category::where('name', 'like', "%{$query}%")->limit(5)->get();
+        $items = Item::with('category')->where('name', 'like', "%{$query}%")->where('user_id', Auth::id())->limit(5)->get();
+        $categories = Category::where('name', 'like', "%{$query}%")->where('user_id', Auth::id())->limit(5)->get();
 
         $html = '';
 

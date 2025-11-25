@@ -22,6 +22,7 @@ class ChartController extends Controller
         $data = StockUsage::selectRaw('MONTH(created_at) as bulan, SUM(amount) as total')
             ->groupBy('bulan')
             ->orderBy('bulan')
+            ->where('user_id', Auth::id())
             ->get();
 
         /* $data =  [
@@ -78,6 +79,7 @@ class ChartController extends Controller
         $top = StockUsage::selectRaw('items.category_id, categories.name, SUM(stock_usage.amount) AS total_amount')
             ->join('items', 'stock_usage.item_id', '=', 'items.id')
             ->join('categories', 'items.category_id', '=', 'categories.id')
+            ->where('stock_usage.user_id', Auth::id()) // PENTING: taruh sebelum groupBy
             ->groupBy('items.category_id', 'categories.name')
             ->orderByDesc('total_amount')
             ->limit(3)
