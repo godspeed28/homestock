@@ -50,7 +50,7 @@
                         <th>Item</th>
                         <th>Keterangan</th>
                         <th>Tanggal</th>
-                        <th width="60">Action</th>
+                        <th width="60">Aksi</th>
                     </tr>
                 </thead>
 

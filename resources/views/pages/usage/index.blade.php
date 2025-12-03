@@ -1,39 +1,15 @@
 @extends('layouts.main')
 
-@section('title', 'Usage - Inventory Management')
+@section('title', 'Usage')
 
 @section('content')
-    <div class="d-flex align-items-center justify-content-between mb-5">
-        <div>
-            <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-hand-holding-box mr-2 text-primary"></i> Penggunaan Barang
+    <div class="mb-1">
+        <div class="d-flex">
+            <h1 class="h3 text-gray-800">
+                <i class="fas fa-warehouse mr-2"></i> Inventory Management
             </h1>
-            <p class="text-muted mb-0">Ambil barang yang tersedia dari inventaris</p>
-        </div>
-        <div class="d-flex align-items-center">
-            <div class="mr-3">
-                <div class="d-flex align-items-center">
-                    <div class="mr-2">
-                        <span class="badge badge-dot badge-success"></span>
-                    </div>
-                    <small class="text-muted">Stok Aman</small>
-                </div>
-                <div class="d-flex align-items-center mt-1">
-                    <div class="mr-2">
-                        <span class="badge badge-dot badge-warning"></span>
-                    </div>
-                    <small class="text-muted">Stok Kritis</small>
-                </div>
-                <div class="d-flex align-items-center mt-1">
-                    <div class="mr-2">
-                        <span class="badge badge-dot badge-danger"></span>
-                    </div>
-                    <small class="text-muted">Stok Habis</small>
-                </div>
-            </div>
-            <button class="btn btn-outline-primary" id="toggleView">
-                <i class="fas fa-th-large"></i>
-            </button>
+            <p class="text-muted ml-2" style="margin-top: 0.5%;"><i class="fa-solid fa-dolly"></i> Ambil barang yang tersedia
+                dari inventaris</p>
         </div>
     </div>
 
@@ -78,7 +54,7 @@
                 </div>
                 <h3 class="mt-4 text-muted">Tidak ada barang tersedia</h3>
                 <p class="text-muted mb-4">Tambahkan barang terlebih dahulu untuk mulai mengelola stok</p>
-                <a href="{{ route('items.create') }}" class="btn btn-primary">
+                <a href="{{ route('items.index') }}" class="btn btn-primary">
                     <i class="fas fa-plus mr-2"></i>Tambah Barang Baru
                 </a>
             </div>
@@ -148,7 +124,7 @@
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="text-muted small">Stok Tersedia</span>
                                     <span class="font-weight-bold text-{{ $statusColor }}">
-                                        {{ $item->stock }} {{ $item->unit }}
+                                        {{ round($item->stock) }} {{ $item->unit }}
                                     </span>
                                 </div>
 
@@ -174,7 +150,7 @@
                                 @if ($isCritical && !$isEmpty)
                                     <div class="alert alert-warning small py-2 mb-0">
                                         <i class="fas fa-exclamation-circle mr-1"></i>
-                                        Minimum: {{ $item->minimum_stock }} {{ $item->unit }}
+                                        Minimum: {{ round($item->minimum_stock) }} {{ $item->unit }}
                                     </div>
                                 @endif
                             </div>
@@ -246,7 +222,7 @@
     @endif
 @endsection
 
-@push('styles')
+@section('styles')
     <style>
         .hover-shadow {
             transition: all 0.3s ease;
@@ -327,9 +303,9 @@
             background: rgba(0, 0, 0, 0.02);
         }
     </style>
-@endpush
+@endsection
 
-@push('scripts')
+@section('scripts')
     <script>
         $(document).ready(function() {
             // Auto dismiss alerts
@@ -362,8 +338,8 @@
                     reverseButtons: true,
                     buttonsStyling: false,
                     customClass: {
-                        confirmButton: 'btn btn-primary btn-lg px-4 py-2',
-                        cancelButton: 'btn btn-outline-secondary btn-lg px-4 py-2'
+                        confirmButton: 'btn btn-primary btn-lg px-4 py-2 m-2',
+                        cancelButton: 'btn btn-outline-secondary btn-lg px-4 py-2 ml-5'
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
@@ -463,4 +439,4 @@
             });
         });
     </script>
-@endpush
+@endsection

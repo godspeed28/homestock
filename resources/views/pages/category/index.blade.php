@@ -6,7 +6,7 @@
 
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-tags mr-2"></i> Category Management
+            <i class="fas fa-warehouse mr-2"></i> Inventory Management
         </h1>
     </div>
 
@@ -44,14 +44,6 @@
                 <i class="fas fa-clipboard-list"></i>
             </span>
             <span class="text">Item</span>
-        </a>
-
-        <!-- Dashboard -->
-        <a href="{{ route('dashboard') }}" class="btn btn-info btn-icon-split shadow-sm ml-2">
-            <span class="icon text-white-50">
-                <i class="fas fa-chart-line"></i>
-            </span>
-            <span class="text">Dashboard</span>
         </a>
     </div>
 
@@ -117,12 +109,12 @@
                 </div>
             @else
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle" id="categoryTable" width="100%"
+                    <table class="table table-bordered table-hover align-middle" id="dataTable" width="100%"
                         cellspacing="0">
                         <thead class="bg-light">
                             <tr>
                                 <th width="5%">#</th>
-                                <th class="text-center">Nama Kategori</th>
+                                <th class="text-center">Nama</th>
                                 <th width="20%" class="text-center">Jumlah Item</th>
                                 <th width="15%" class="text-center">Aksi</th>
                             </tr>
@@ -133,12 +125,12 @@
                                     <td class="text-center">{{ $loop->iteration }}</td>
                                     <td class="text-center">
                                         <span class="badge badge-info px-3 py-2 font-weight-normal">
-                                            <i class="fas fa-tag mr-1"></i> {{ $category->name }}
+                                            {{ $category->name }}
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <span class="badge badge-secondary px-3 py-2">
-                                            {{ $category->items_count ?? 0 }} Item
+                                            {{ $category->items_count ?? 0 }}
                                         </span>
                                     </td>
                                     <td>
@@ -229,30 +221,9 @@
 @endsection
 
 @section('scripts')
-    <!-- Page level plugins -->
-    <script src="{{ asset('sbadmin/vendor/datatables/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('sbadmin/vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
-
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         // Inisialisasi DataTable
         $(document).ready(function() {
-            $('#categoryTable').DataTable({
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
-                },
-                "order": [
-                    [1, 'asc']
-                ],
-                "pageLength": 10,
-                "responsive": true,
-                "columnDefs": [{
-                    "orderable": false,
-                    "targets": [0, 3]
-                }]
-            });
 
             // Tooltip
             $('[title]').tooltip();

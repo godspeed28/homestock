@@ -6,7 +6,7 @@
 
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-cog mr-2"></i>Pengaturan Akun
+            <i class="fas fa-cog mr-2"></i> Settings
         </h1>
     </div>
 
@@ -219,7 +219,7 @@
 
 @endsection
 
-@push('scripts')
+@section('scripts')
     <script>
         // WhatsApp input mask (hanya angka)
         document.getElementById('whatsappInput').addEventListener('input', function(e) {
@@ -263,14 +263,20 @@
                 progressBar.className = 'progress-bar bg-success';
                 strengthText.textContent = 'Password kuat';
                 strengthText.className = 'form-text text-success';
+                progressBar.style.width = 100 + '%';
             }
         });
 
-        // Form validation
+        // Form validation dengan SweetAlert
         document.getElementById('settingsForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Mencegah submit default
+
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const submitBtn = document.getElementById('submitBtn');
+
+            // Simpan referensi form
+            const form = this;
 
             // Disable button to prevent double submit
             submitBtn.disabled = true;
@@ -278,11 +284,100 @@
 
             // Check password match
             if (newPassword && newPassword !== confirmPassword) {
-                e.preventDefault();
-                alert('Password baru dan konfirmasi password tidak cocok!');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Perubahan';
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Password baru dan konfirmasi password tidak cocok!',
+                    confirmButtonText: 'Coba Lagi',
+                    confirmButtonColor: '#dc3545',
+                    timer: 3000,
+                    timerProgressBar: true
+                }).then(() => {
+                    // Reset button state
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Perubahan';
+
+                    // Focus ke field password
+                    document.getElementById('confirmPassword').focus();
+                });
+                return;
             }
+
+            // Validasi berhasil, tampilkan konfirmasi
+            Swal.fire({
+                title: 'Simpan Perubahan?',
+                text: "Apakah Anda yakin ingin menyimpan perubahan pengaturan?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Simpan!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Tampilkan loading
+                    Swal.fire({
+                        title: 'Menyimpan...',
+                        text: 'Harap tunggu sebentar',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Submit form setelah delay untuk simulasi
+                    setTimeout(() => {
+                        // Jika menggunakan AJAX, tambahkan kode AJAX di sini
+                        // Untuk form submit biasa:
+                        form.submit();
+
+                        // Atau jika ingin tampilkan sukses dulu:
+                        /*
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Pengaturan berhasil disimpan',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#28a745',
+                            timer: 2000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            form.submit();
+                        });
+                        */
+                    }, 1500);
+                } else {
+                    // Reset button state jika dibatalkan
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Simpan Perubahan';
+                }
+            });
+        });
+
+        // Tambahkan fungsi untuk menampilkan SweetAlert saat ada perubahan berhasil disimpan
+        // (Tambahkan ini jika Anda ingin menampilkan notifikasi setelah form berhasil submit)
+        function showSuccessAlert() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('saved') === 'true') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Pengaturan berhasil diperbarui',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#28a745',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false
+                });
+            }
+        }
+
+        // Panggil fungsi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            showSuccessAlert();
         });
     </script>
-@endpush
+@endsection

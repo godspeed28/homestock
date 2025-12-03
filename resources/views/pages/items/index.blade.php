@@ -47,9 +47,11 @@
             <form action="{{ route('items.store') }}" method="POST">
                 @csrf
                 <div class="modal-content shadow-lg">
-                    <div class="modal-header">
-                        <h5 class="modal-title"><i class="fas fa-box mr-2"></i> Tambah Item Baru</h5>
-                        <button type="button" class="close" data-dismiss="modal">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-folder-plus mr-2"></i> Tambah Item Baru
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal">
                             <span>&times;</span>
                         </button>
                     </div>
@@ -133,7 +135,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
                             <i class="fas fa-times mr-1"></i> Batal
                         </button>
                         <button type="submit" class="btn btn-primary">
@@ -149,7 +151,7 @@
     <div class="card shadow">
         <div class="card-header py-3 bg-white">
             <h6 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-table mr-2"></i> Data Item
+                <i class="fas fa-table mr-2"></i> Daftar Item
             </h6>
         </div>
 
@@ -206,9 +208,9 @@
                                     </td>
                                     <td>
                                         @if ($isCritical)
-                                            <span class="badge badge-danger">KRITIS</span>
+                                            <span class="badge badge-danger px-3 py-2">Kritis</span>
                                         @else
-                                            <span class="badge badge-success">AMAN</span>
+                                            <span class="badge badge-success px-3 py-2">Aman</span>
                                         @endif
                                     </td>
                                     <td>
@@ -243,11 +245,11 @@
                                             @method('PUT')
 
                                             <div class="modal-content shadow">
-                                                <div class="modal-header">
+                                                <div class="modal-header bg-warning text-white">
                                                     <h5 class="modal-title">
                                                         <i class="fas fa-edit mr-2"></i> Edit Item
                                                     </h5>
-                                                    <button type="button" class="close" data-dismiss="modal">
+                                                    <button type="button" class="close text-white" data-dismiss="modal">
                                                         <span>&times;</span>
                                                     </button>
                                                 </div>
@@ -305,12 +307,12 @@
                                                 </div>
 
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
+                                                    <button type="button" class="btn btn-outline-secondary"
                                                         data-dismiss="modal">
-                                                        Batal
+                                                        <i class="fas fa-times mr-1"></i> Batal
                                                     </button>
-                                                    <button type="submit" class="btn btn-primary">
-                                                        Simpan
+                                                    <button type="submit" class="btn btn-warning text-white shadow-sm">
+                                                        <i class="fas fa-save mr-1"></i> Update
                                                     </button>
                                                 </div>
                                             </div>

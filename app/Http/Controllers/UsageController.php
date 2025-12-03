@@ -23,58 +23,64 @@ class UsageController extends Controller
 
     public function ambil($id)
     {
-        // Gunakan database transaction dengan lock untuk menghindari race condition
         return DB::transaction(function () use ($id) {
             $item = Item::where('id', $id)
                 ->where('user_id', Auth::id())
-                ->lockForUpdate() // Lock row untuk menghindari race condition
+                ->lockForUpdate()
                 ->firstOrFail();
 
             if ($item->stock <= 0) {
                 return back()->with('error', 'Stok barang sudah habis!');
             }
 
-            // Simpan stock sebelum dikurangi untuk notifikasi
             $oldStock = $item->stock;
 
-            // Kurangi stock
-            $item->decrement('stock'); // Gunakan decrement() untuk atomic operation
-
-            // Refresh data item untuk mendapatkan nilai stock terbaru
+            // Kurangi stock dan dapatkan nilai baru
+            $item->decrement('stock');
             $item->refresh();
 
-            // Notifikasi WA masuk queue
+            // Commit transaksi dulu sebelum dispatch job
+            DB::commit();
+
+            // Kirim notifikasi jika stock turun ke atau di bawah minimum
             if (
                 $oldStock > $item->minimum_stock &&
                 $item->stock <= $item->minimum_stock
             ) {
-                SendWhatsappNotificationJob::dispatch(
-                    Auth::user()->whatsapp_number,
-                    "🚨 *PERINGATAN STOK KRITIS* 🚨\n" .
-                        "═════════════════════════\n\n" .
-                        "📦 *Nama Barang:* {$item->name}\n" .
-                        "📉 *Stok Tersisa:* {$item->stock} {$item->unit}\n" .
-                        "⚠️ *Level Stok:* " . ($item->stock == 0 ? "HABIS" : "KRITIS") . "\n" .
-                        "📋 *Minimum Stok:* {$item->minimum_stock} {$item->unit}\n" .
-                        "📊 *Persentase Stok:* " . ($item->maximum_stock > 0 ? round(($item->stock / $item->maximum_stock) * 100, 1) : 0) . "%\n" .
-                        "🕐 *Waktu:* " . now()->translatedFormat('l, d F Y H:i:s') . "\n" .
-                        "👤 *Diambil oleh:* " . Auth::user()->name . "\n\n" .
-                        "🚀 *TINDAKAN DIBUTUHKAN:*\n" .
-                        "1️⃣ Lakukan restock segera\n" .
-                        "2️⃣ Periksa kebutuhan stok berikutnya\n" .
-                        "3️⃣ Update data pembelian\n\n" .
-                        "🔔 *CATATAN PENTING:*\n" .
-                        "Stok saat ini sudah di ambang batas minimum. Segera hubungi supplier atau lakukan pembelian untuk menghindari kekosongan stok.\n\n" .
-                        "📞 *Untuk bantuan:*\n" .
-                        "Hubungi admin atau akses sistem untuk update stok.\n\n" .
-                        "✅ *Status:* " . ($item->stock == 0 ? "URGENT - STOK HABIS" : "WARNING - STOK KRITIS") . "\n" .
-                        "═════════════════════════\n" .
-                        "🏠 *HomeStock Inventory System*\n" .
-                        "📱 Notifikasi Otomatis"
-                );
+                // Hanya ambil item yang stock-nya ≤ minimum_stock masing-masing
+                $lowStockItems = Item::where('user_id', Auth::id())
+                    ->whereColumn('stock', '<=', 'minimum_stock')
+                    ->get();
+
+                if ($lowStockItems->isNotEmpty()) {
+                    $message = "⚡ *HomeStock Alert* ⚡\n────────────────────\n";
+                    $message .= "📌 *Stok Menipis*\n\n";
+
+                    foreach ($lowStockItems as $lowItem) {
+                        $stock = round($lowItem->stock);
+                        $stockMin = round($lowItem->minimum_stock);
+                        $level = $lowItem->stock <= ($lowItem->minimum_stock * 0.5)
+                            ? "‼️ Sangat Rendah"
+                            : "⚠️ Rendah";
+
+                        $message .= "🛍️ *Barang:* {$lowItem->name}\n";
+                        $message .= "📊 *Sisa Stok:* {$stock} {$lowItem->unit}\n";
+                        $message .= "📉 *Minimal Stok:* {$stockMin} {$lowItem->unit}\n";
+                        $message .= "⏱️ *Level Kritis:* {$level}\n";
+                        $message .= "────────────────────\n";
+                    }
+
+                    $message .= "💡 *Saran:* Segera lakukan restock agar stok tidak habis.\n";
+                    $message .= "🏠 *HomeStock* | Pantau stokmu dengan mudah!";
+
+                    SendWhatsappNotificationJob::dispatch(
+                        Auth::user()->whatsapp_number,
+                        $message
+                    );
+                }
             }
 
-            // Penyimpanan riwayat masuk queue
+            // Dispatch riwayat
             SaveStockUsageJob::dispatch(
                 Auth::id(),
                 $item->id,

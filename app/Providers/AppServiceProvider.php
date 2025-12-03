@@ -20,15 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Untuk development
-        if (app()->environment('local')) {
-            // Pastikan pakai HTTP dengan port 8000
-            URL::forceScheme('http');
-            config(['app.url' => 'http://localhost:8000']);
-        }
-        // Untuk production
-        elseif (app()->environment('production')) {
-            // Force HTTPS di production
+        if (request()->isSecure() || str_contains(request()->getHost(), 'ngrok')) {
             URL::forceScheme('https');
         }
     }
