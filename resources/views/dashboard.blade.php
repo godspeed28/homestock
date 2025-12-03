@@ -21,7 +21,7 @@
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalItem() }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-boxes fa-2x text-primary-300"></i>
+                            <i class="fas fa-boxes fa-2x text-primary"></i>
                         </div>
                     </div>
                 </div>
@@ -39,7 +39,7 @@
                             <div class="h5 mb-0 font-weight-bold text-gray-800">{{ itemKritis() }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="fas fa-triangle-exclamation fa-2x text-danger-300"></i>
+                            <i class="fas fa-triangle-exclamation fa-2x text-danger"></i>
                         </div>
                     </div>
                 </div>
@@ -58,14 +58,9 @@
 
                             @php
                                 $presentase = 0;
-                                if (itemTerpakai() > 0) {
-                                    if (totalItem() == 0) {
-                                        $presentase = 100;
-                                    } else {
-                                        $total = totalItem() + itemTerpakai();
-                                        $presentase = (itemTerpakai() / $total) * 100;
-                                        $presentase = min($presentase, 100);
-                                    }
+                                if (totalItem() > 0) {
+                                    $presentase = (itemTerpakai() / totalItem()) * 100;
+                                    $presentase = min($presentase, 100);
                                 }
                             @endphp
 
@@ -80,8 +75,10 @@
                         </div>
 
                         <div class="col-auto text-center">
-                            <i class="fas fa-box-open fa-2x text-info-300"></i>
-                            <div class="text-xs font-weight-bold mt-1 text-info">{{ round($presentase) }}%</div>
+                            <i class="fas fa-box-open fa-2x text-info"></i>
+                            <div class="text-xs font-weight-bold mt-1 text-info">
+                                {{ totalItem() > 0 ? round($presentase) . '%' : '0%' }}
+                            </div>
                         </div>
 
                     </div>
@@ -102,7 +99,7 @@
                         </div>
 
                         <div class="col-auto">
-                            <i class="fas fa-money-bill-wave fa-2x text-warning-300"></i>
+                            <i class="fas fa-money-bill-wave fa-2x text-warning"></i>
                         </div>
 
                     </div>
@@ -152,8 +149,10 @@
 @endsection
 
 @section('scripts')
+    <!-- Page level plugins -->
+    <script src="{{ asset('sbadmin/vendor/chart.js/Chart.min.js') }}"></script>
 
+    <!-- Page level custom scripts -->
     <script src="{{ asset('sbadmin/js/demo/chart-area-demo.js') }}"></script>
     <script src="{{ asset('sbadmin/js/demo/chart-pie-demo.js') }}"></script>
-
 @endsection

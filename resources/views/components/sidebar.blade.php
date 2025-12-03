@@ -49,7 +49,7 @@
     </li>
 
     <li class="nav-item">
-        <form method="POST" action="{{ route('logout') }}">
+        <form method="POST" action="{{ route('auth.logout') }}">
             @csrf
             <button class="btn mb-0 text-danger" style="font-size: 15px;" type="submit"><i
                     class="text-danger fas fa-fw fa-sign-out-alt"></i>

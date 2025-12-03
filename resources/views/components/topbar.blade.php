@@ -69,7 +69,7 @@
                         class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>Settings</a>
                 <div class="dropdown-divider"></div>
 
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('auth.logout') }}">
                     @csrf
                     <button class="dropdown-item" type="submit"><i
                             class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400">Log Out</i></button>

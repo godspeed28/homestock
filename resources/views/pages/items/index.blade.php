@@ -16,7 +16,13 @@
         </div>
     @endif
 
-    <div class="mb-3">
+    @if (session('error'))
+        <div class="alert alert-danger shadow-sm">
+            <i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="mb-4">
         <!-- Tombol Tambah Item -->
         <button type="button" class="btn btn-primary btn-icon-split shadow-sm" data-toggle="modal"
             data-target="#createItemModal">
@@ -52,52 +58,82 @@
                         <!-- Nama Item -->
                         <div class="form-group">
                             <label>Nama Item</label>
-                            <input type="text" name="name" class="form-control" placeholder="Contoh: Gula Pasir"
-                                required>
+                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
+                                placeholder="Contoh: Gula Pasir" value="{{ old('name') }}" required>
+                            @error('name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <!-- Kategori -->
                         <div class="form-group">
                             <label>Kategori</label>
-                            <select name="category_id" class="form-control" required>
-                                <option disabled selected>Pilih Kategori</option>
+                            <select name="category_id" class="form-control @error('category_id') is-invalid @enderror"
+                                required>
+                                <option value="" disabled selected>Pilih Kategori</option>
                                 @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    <option value="{{ $category->id }}"
+                                        {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
                                 @endforeach
                             </select>
+                            @error('category_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <!-- Stok -->
                         <div class="form-group">
                             <label>Stok</label>
-                            <input type="number" name="stock" class="form-control" placeholder="Masukkan jumlah stok"
-                                required>
+                            <input type="number" name="stock" class="form-control @error('stock') is-invalid @enderror"
+                                placeholder="Masukkan jumlah stok" value="{{ old('stock') }}" min="0" required>
+                            @error('stock')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <!-- Satuan -->
                         <div class="form-group">
                             <label>Satuan</label>
-                            <input type="text" name="unit" class="form-control" placeholder="Contoh: Kg, Pcs"
-                                required>
+                            <input type="text" name="unit" class="form-control @error('unit') is-invalid @enderror"
+                                placeholder="Contoh: Kg, Pcs" value="{{ old('unit') }}" required>
+                            @error('unit')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <!-- Harga -->
                         <div class="form-group">
                             <label>Harga Satuan</label>
-                            <input type="number" name="harga_satuan" class="form-control" placeholder="Masukkan harga"
-                                required>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Rp</span>
+                                </div>
+                                <input type="number" name="harga_satuan"
+                                    class="form-control @error('harga_satuan') is-invalid @enderror"
+                                    placeholder="Masukkan harga" value="{{ old('harga_satuan') }}" min="0" required>
+                                @error('harga_satuan')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
 
                         <!-- Minimum Stock -->
                         <div class="form-group">
                             <label>Minimum Stock</label>
-                            <input type="number" name="minimum_stock" class="form-control"
-                                placeholder="Stok minimum sebelum peringatan" required>
+                            <input type="number" name="minimum_stock"
+                                class="form-control @error('minimum_stock') is-invalid @enderror"
+                                placeholder="Stok minimum sebelum peringatan" value="{{ old('minimum_stock') }}"
+                                min="1" required>
+                            @error('minimum_stock')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 
                     <div class="modal-footer">
-                        <button class="btn btn-secondary" data-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
                             <i class="fas fa-times mr-1"></i> Batal
                         </button>
                         <button type="submit" class="btn btn-primary">
@@ -109,8 +145,6 @@
         </div>
     </div>
 
-    <hr>
-
     <!-- Tabel -->
     <div class="card shadow">
         <div class="card-header py-3 bg-white">
@@ -120,164 +154,203 @@
         </div>
 
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle text-center" id="dataTable">
-                    <thead class="bg-light">
-                        <tr>
-                            <th>#</th>
-                            <th>Nama</th>
-                            <th>Stock</th>
-                            <th>Satuan</th>
-                            <th>Minimum</th>
-                            <th>Harga Satuan</th>
-                            <th>Total Harga</th>
-                            <th>Kategori</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach ($items as $item)
+            @if ($items->isEmpty())
+                <div class="text-center py-5">
+                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Belum ada data item. Silakan tambah item baru.</p>
+                </div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle text-center" id="dataTable" width="100%"
+                        cellspacing="0">
+                        <thead class="bg-light">
                             <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td class="font-weight-bold">{{ $item->name }}</td>
-                                <td>
-                                    <span class="badge badge-primary p-2">{{ round($item->stock) }}</span>
-                                </td>
-                                <td>{{ $item->unit }}</td>
-                                <td>
-                                    <span class="badge badge-warning p-2">{{ round($item->minimum_stock) }}</span>
-                                </td>
-                                <td>{{ rupiah($item->harga_satuan) }}</td>
-                                <td>{{ rupiah($item->total_harga) }}</td>
-                                <td>
-                                    @if (!empty($item->category->name))
-                                        <span class="badge badge-info p-2">{{ $item->category->name }}</span>
-                                    @else
-                                        <span class="badge badge-secondary p-2">Tidak ada kategori</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <a href="#" class="mr-2" data-toggle="modal"
-                                        data-target="#editItemModal{{ $item->id }}" data-toggle="tooltip"
-                                        title="Edit">
-                                        <i class="fa fa-edit text-warning"></i>
-                                    </a>
-
-                                    <a href="#" class="btn-delete" data-id="{{ $item->id }}"
-                                        data-toggle="tooltip" title="Hapus">
-                                        <i class="fa fa-trash text-danger"></i>
-                                    </a>
-
-                                    <form id="delete-form-{{ $item->id }}"
-                                        action="{{ route('items.destroy', $item->id) }}" method="POST" class="d-none">
-                                        @csrf
-                                        @method('DELETE')
-                                    </form>
-                                </td>
+                                <th>#</th>
+                                <th>Nama</th>
+                                <th>Stock</th>
+                                <th>Satuan</th>
+                                <th>Minimum</th>
+                                <th>Harga Satuan</th>
+                                <th>Total Harga</th>
+                                <th>Kategori</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
                             </tr>
+                        </thead>
 
-                            <!-- Modal Edit -->
-                            <div class="modal fade" id="editItemModal{{ $item->id }}">
-                                <div class="modal-dialog">
-                                    <form action="{{ route('items.update', $item->id) }}" method="POST">
-                                        @csrf
-                                        @method('PUT')
+                        <tbody>
+                            @foreach ($items as $item)
+                                @php
+                                    $isCritical = $item->stock <= $item->minimum_stock;
+                                @endphp
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td class="font-weight-bold">{{ $item->name }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ $isCritical ? 'danger' : 'primary' }} p-2">
+                                            {{ round($item->stock) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $item->unit }}</td>
+                                    <td>
+                                        <span class="badge badge-warning p-2">{{ round($item->minimum_stock) }}</span>
+                                    </td>
+                                    <td>{{ rupiah($item->harga_satuan) }}</td>
+                                    <td>{{ rupiah($item->total_harga) }}</td>
+                                    <td>
+                                        @if ($item->category)
+                                            <span class="badge badge-info p-2">{{ $item->category->name }}</span>
+                                        @else
+                                            <span class="badge badge-secondary p-2">Tanpa Kategori</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($isCritical)
+                                            <span class="badge badge-danger">KRITIS</span>
+                                        @else
+                                            <span class="badge badge-success">AMAN</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center">
+                                            <a href="#" class="btn btn-sm btn-circle btn-outline-warning mr-2"
+                                                data-toggle="modal" data-target="#editItemModal{{ $item->id }}"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
 
-                                        <div class="modal-content shadow">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">
-                                                    <i class="fas fa-edit mr-2"></i> Edit Item
-                                                </h5>
-                                                <button type="button" class="close" data-dismiss="modal">
-                                                    <span>&times;</span>
-                                                </button>
-                                            </div>
+                                            <a href="#" class="btn btn-sm btn-circle btn-outline-danger btn-delete"
+                                                data-id="{{ $item->id }}" data-name="{{ $item->name }}"
+                                                title="Hapus">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
 
-                                            <div class="modal-body">
-                                                <div class="form-group">
-                                                    <label>Nama Item</label>
-                                                    <input type="text" name="name" class="form-control"
-                                                        value="{{ $item->name }}" required>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label>Kategori</label>
-                                                    <select name="category_id" class="form-control">
-                                                        @foreach ($categories as $category)
-                                                            <option value="{{ $category->id }}"
-                                                                {{ $category->id == $item->category_id ? 'selected' : '' }}>
-                                                                {{ $category->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label>Stok</label>
-                                                    <input type="number" name="stock" class="form-control"
-                                                        value="{{ round($item->stock) }}" required>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label>Satuan</label>
-                                                    <input type="text" name="unit" class="form-control"
-                                                        value="{{ $item->unit }}" required>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label>Harga Satuan</label>
-                                                    <input type="number" name="harga_satuan" class="form-control"
-                                                        value="{{ $item->harga_satuan }}" required>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label>Minimum Stock</label>
-                                                    <input type="number" name="minimum_stock" class="form-control"
-                                                        value="{{ round($item->minimum_stock) }}" required>
-                                                </div>
-                                            </div>
-
-                                            <div class="modal-footer">
-                                                <button class="btn btn-secondary" data-dismiss="modal">
-                                                    Batal
-                                                </button>
-                                                <button type="submit" class="btn btn-primary">
-                                                    Simpan
-                                                </button>
-                                            </div>
+                                            <form id="delete-form-{{ $item->id }}"
+                                                action="{{ route('items.destroy', $item->id) }}" method="POST"
+                                                class="d-none">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
                                         </div>
+                                    </td>
+                                </tr>
 
-                                    </form>
+                                <!-- Modal Edit -->
+                                <div class="modal fade" id="editItemModal{{ $item->id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <form action="{{ route('items.update', $item->id) }}" method="POST">
+                                            @csrf
+                                            @method('PUT')
+
+                                            <div class="modal-content shadow">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">
+                                                        <i class="fas fa-edit mr-2"></i> Edit Item
+                                                    </h5>
+                                                    <button type="button" class="close" data-dismiss="modal">
+                                                        <span>&times;</span>
+                                                    </button>
+                                                </div>
+
+                                                <div class="modal-body">
+                                                    <div class="form-group">
+                                                        <label>Nama Item</label>
+                                                        <input type="text" name="name" class="form-control"
+                                                            value="{{ $item->name }}" required>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Kategori</label>
+                                                        <select name="category_id" class="form-control">
+                                                            <option value="">Tanpa Kategori</option>
+                                                            @foreach ($categories as $category)
+                                                                <option value="{{ $category->id }}"
+                                                                    {{ $category->id == $item->category_id ? 'selected' : '' }}>
+                                                                    {{ $category->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Stok</label>
+                                                        <input type="number" name="stock" class="form-control"
+                                                            value="{{ round($item->stock) }}" min="0" required>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Satuan</label>
+                                                        <input type="text" name="unit" class="form-control"
+                                                            value="{{ $item->unit }}" required>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Harga Satuan</label>
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">Rp</span>
+                                                            </div>
+                                                            <input type="number" name="harga_satuan"
+                                                                class="form-control" value="{{ $item->harga_satuan }}"
+                                                                min="0" required>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label>Minimum Stock</label>
+                                                        <input type="number" name="minimum_stock" class="form-control"
+                                                            value="{{ round($item->minimum_stock) }}" min="1"
+                                                            required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-dismiss="modal">
+                                                        Batal
+                                                    </button>
+                                                    <button type="submit" class="btn btn-primary">
+                                                        Simpan
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
-                            </div>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
     </div>
 @endsection
 
 @section('scripts')
     <script>
-        document.querySelectorAll('.btn-delete').forEach(button => {
-            button.addEventListener('click', function(e) {
+        $(document).ready(function() {
+
+            // Inisialisasi tooltip
+            $('[title]').tooltip();
+
+            // SweetAlert untuk delete
+            $('.btn-delete').click(function(e) {
                 e.preventDefault();
-                let itemId = this.dataset.id;
+                let itemId = $(this).data('id');
+                let itemName = $(this).data('name');
 
                 Swal.fire({
                     title: 'Hapus Item?',
-                    text: "Data tidak bisa dikembalikan setelah dihapus.",
+                    html: `<strong>${itemName}</strong><br>Data tidak bisa dikembalikan setelah dihapus.`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Hapus',
+                    confirmButtonText: 'Ya, Hapus!',
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        document.getElementById('delete-form-' + itemId).submit();
+                        $('#delete-form-' + itemId).submit();
                     }
                 });
             });
